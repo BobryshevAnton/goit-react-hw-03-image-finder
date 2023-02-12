@@ -1,14 +1,24 @@
 import React, { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
-import Fetch from './Fetch/Fetch';
+// import { fetchImg } from './Fetch/Fetch';
 import Button from './Button/Button';
+import { ImageGallery } from './ImageGallery/ImageGallery';
 // import axios from 'axios';
+//  API
+const API_KEY = '32040937-f5067777972aaaf890ed94a62';
+const baseURL = 'https://pixabay.com/api/';
 
 class App extends Component {
   state = {
     page: 1,
     searchQuery: '',
     collection: [],
+    //
+    isEmpty: false,
+    //
+    isLoading: false,
+    //
+    error: '',
   };
 
   // searchForm
@@ -28,33 +38,30 @@ class App extends Component {
   //
 
   componentDidUpdate(_, prevState) {
-    if (
-      prevState.page !== this.state.page ||
-      prevState.searchQuery !== this.state.searchQuery
-    ) {
-      // console.log(this.state.collection);
-      // console.log('fetch');
-      // console.log(this.state);
+    const { page, searchQuery } = this.state;
+    if (prevState.page !== page || prevState.searchQuery !== searchQuery) {
+      fetch(
+        `${baseURL}?key=${API_KEY}&q=${searchQuery}&page=${page}&per_page=15`
+      )
+        .then(response => response.json())
+        .then(collection =>
+          this.setState(prevState => ({
+            collection: [...prevState.collection, ...collection.hits],
+          }))
+        );
     }
+    // console.log(this.state.collection);
   }
-  //
-  // async componentDidMount() {
-  //   const { searchQuery } = this.state;
-
-  //   const response = await axios.get('`&q=&{search}&page=1&per_page=3`');
-  //   this.setState({ collection: response.data.hits });
-  // }
 
   render() {
+    const { collection } = this.state;
+    console.log(collection.hits);
     return (
       <div>
         <Searchbar onForm={this.handleForm} />
-        <Fetch query={this.state.searchQuery} />
-        <Button loadMore={this.loadMore} />
 
-        {/* <ImageGallery>
-//         <ImageGalleryItem />
-//       </ImageGallery> */}
+        <ImageGallery collection={collection} />
+        <Button loadMore={this.loadMore} />
       </div>
     );
   }
