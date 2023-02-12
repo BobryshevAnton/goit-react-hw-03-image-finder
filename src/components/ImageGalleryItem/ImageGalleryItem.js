@@ -1,5 +1,5 @@
 import css from './imageGalleryItem.module.css';
-import Modal from 'components/Modal/Modal';
+// import Modal from 'components/Modal/Modal';
 
 export const ImageGalleryItem = ({ elem, showModal }) => {
   return (
@@ -9,7 +9,7 @@ export const ImageGalleryItem = ({ elem, showModal }) => {
         alt={elem.user}
         className={css.imageGalleryItem__image}
       />
-      <Modal image={elem.largeImageURL} showModal={showModal} />
+      {/* <Modal image={elem.largeImageURL} showModal={showModal} /> */}
     </li>
   );
 };
