@@ -95,7 +95,7 @@ class App extends Component {
         <Searchbar onForm={this.handleForm} />
         {isEnterText && (
           <div style={{ textAlign: 'center', marginTop: 10 }}>
-            Please, enter any text...
+            Please, enter any text...!
           </div>
         )}
         {isLoadingSpin && <Loader />}
