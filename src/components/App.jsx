@@ -5,6 +5,8 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import Modal from './Modal/Modal';
 
+import MyPage from './MyPage/MyPage';
+
 const API_KEY = '32040937-f5067777972aaaf890ed94a62';
 const baseURL = 'https://pixabay.com/api/';
 
@@ -19,6 +21,9 @@ class App extends Component {
     error: '',
     isLoadingSpin: false,
     largeImageURL: '',
+    isPagin: false,
+    //
+    totalHits: '',
   };
 
   // searchForm
@@ -35,7 +40,16 @@ class App extends Component {
       page: prevState.page + 1,
     }));
   };
-  //modal
+
+  //pagine
+  load = x => {
+    this.setState({
+      page: x,
+
+      collection: [],
+    });
+  };
+
   setLargeImgUrl = largeImageURL => {
     this.setState({
       largeImageURL: largeImageURL,
@@ -68,7 +82,7 @@ class App extends Component {
 
   componentDidUpdate(_, prevState) {
     const { page, searchQuery } = this.state;
-
+    const length = page * 12;
     if (prevState.page !== page || prevState.searchQuery !== searchQuery) {
       this.setState({ isLoadingSpin: true });
 
@@ -77,14 +91,22 @@ class App extends Component {
       )
         .then(response => response.json())
         .then(collection => {
-          if (collection.total === 0) {
+          if (collection.total === 0 || length >= collection.totalHits) {
             this.setState({ isLoadingMore: false, collectionEmpty: true });
             return;
           }
+
+          if (collection.total === 0) {
+            this.setState({ isPagin: false });
+            return;
+          }
+
           this.setState(prevState => ({
             collection: [...prevState.collection, ...collection.hits],
             isLoadingMore: true,
+            isPagin: true,
             collectionEmpty: false,
+            totalHits: collection.totalHits,
           }));
         })
         .catch(error => this.setState({ error }))
@@ -102,6 +124,7 @@ class App extends Component {
 
   render() {
     const {
+      page,
       collection,
       error,
       isLoadingMore,
@@ -110,6 +133,8 @@ class App extends Component {
       searchQuery,
       isLoadingSpin,
       largeImageURL,
+      isPagin,
+      totalHits,
     } = this.state;
 
     return (
@@ -129,7 +154,6 @@ class App extends Component {
         )}
         <ImageGallery
           collection={collection}
-          // onClick={this.isModalOpen}
           setLargeImgUrl={this.setLargeImgUrl}
         />
         {largeImageURL && (
@@ -139,6 +163,20 @@ class App extends Component {
           />
         )}
         {isLoadingMore && <Button loadMore={this.loadMore} />}
+        {isPagin && (
+          <MyPage
+            load={this.load}
+            loadEnd={this.loadEnd}
+            realPage={page}
+            total={totalHits}
+            loadfone={this.loadone}
+            loadfirst={this.loadfirst}
+            loadtwo={this.loadtwo}
+            loadthree={this.loadthree}
+            loadfour={this.loadfour}
+            loadfive={this.loadfive}
+          />
+        )}
       </div>
     );
   }
