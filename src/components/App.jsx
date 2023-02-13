@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
-// import { fetchImg } from './Fetch/Fetch';
 import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
-// import Modal from './Modal/Modal';
+import Modal from './Modal/Modal';
 
 const API_KEY = '32040937-f5067777972aaaf890ed94a62';
 const baseURL = 'https://pixabay.com/api/';
@@ -19,6 +18,7 @@ class App extends Component {
     isLoadingMore: false,
     error: '',
     isLoadingSpin: false,
+    largeImageURL: '',
   };
 
   // searchForm
@@ -36,17 +36,41 @@ class App extends Component {
     }));
   };
   //modal
-  toggleModal = () => {
-    this.setState(state => ({
-      showModal: !state.showModal,
-    }));
+  setLargeImgUrl = largeImageURL => {
+    this.setState({
+      largeImageURL: largeImageURL,
+    });
   };
+
+  closeModal = event => {
+    if (event.key === 'Escape') {
+      this.setState({
+        largeImageURL: '',
+      });
+    }
+  };
+  handlerClickBackdrop = event => {
+    if (event.currentTarget === event.target) {
+      this.setState({
+        largeImageURL: '',
+      });
+    }
+  };
+
+  componentDidMount() {
+    window.addEventListener('keydown', this.closeModal);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.closeModal);
+  }
+  //
 
   componentDidUpdate(_, prevState) {
     const { page, searchQuery } = this.state;
 
     if (prevState.page !== page || prevState.searchQuery !== searchQuery) {
-      this.setState({ isLoadingasa: true, isLoadingSpin: true });
+      this.setState({ isLoadingSpin: true });
 
       fetch(
         `${baseURL}?key=${API_KEY}&q=${searchQuery}&page=${page}&per_page=12`
@@ -85,8 +109,9 @@ class App extends Component {
       collectionEmpty,
       searchQuery,
       isLoadingSpin,
+      largeImageURL,
     } = this.state;
-    // console.log(collection);
+
     return (
       <div>
         {error && <div>Sorry, this pictures not found!... </div>}
@@ -102,7 +127,17 @@ class App extends Component {
             Sorry, this pictures,name'{searchQuery}' not found!...
           </div>
         )}
-        <ImageGallery collection={collection} />
+        <ImageGallery
+          collection={collection}
+          // onClick={this.isModalOpen}
+          setLargeImgUrl={this.setLargeImgUrl}
+        />
+        {largeImageURL && (
+          <Modal
+            largeImageURL={largeImageURL}
+            handlerClickBackdrop={this.handlerClickBackdrop}
+          />
+        )}
         {isLoadingMore && <Button loadMore={this.loadMore} />}
       </div>
     );

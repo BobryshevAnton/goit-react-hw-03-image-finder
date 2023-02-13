@@ -5,11 +5,16 @@ import { Component } from 'react';
 
 export default class ImageGallery extends Component {
   render() {
-    const { collection } = this.props;
+    const { collection, setLargeImgUrl } = this.props;
+
     return (
       <ul className={css.imageGallery}>
         {collection.map(elem => (
-          <ImageGalleryItem elem={elem} key={elem.id} />
+          <ImageGalleryItem
+            elem={elem}
+            key={elem.id}
+            setLargeImgUrl={setLargeImgUrl}
+          />
         ))}
       </ul>
     );
