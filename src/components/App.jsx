@@ -19,7 +19,6 @@ class App extends Component {
     isLoadingMore: false,
     error: '',
     isLoadingSpin: false,
-    showModal: false,
   };
 
   // searchForm
@@ -86,7 +85,6 @@ class App extends Component {
       collectionEmpty,
       searchQuery,
       isLoadingSpin,
-      showModal,
     } = this.state;
     // console.log(collection);
     return (
@@ -104,10 +102,8 @@ class App extends Component {
             Sorry, this pictures,name'{searchQuery}' not found!...
           </div>
         )}
-        <ImageGallery collection={collection} showModal={showModal} />
+        <ImageGallery collection={collection} />
         {isLoadingMore && <Button loadMore={this.loadMore} />}
-
-        {/* {showModal && <Modal />} */}
       </div>
     );
   }
