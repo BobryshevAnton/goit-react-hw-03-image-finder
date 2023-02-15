@@ -93,18 +93,21 @@ class App extends Component {
             isPagin: true,
             collectionEmpty: false,
             totalHits: collection.totalHits,
+
+            //
+            isLoadingSpin: false,
           }));
         })
-        .catch(error => this.setState({ error }))
-        .finally(() => {
-          setTimeout(() => {
-            this.setState({
-              isEmpty: false,
-              isEnterText: false,
-              isLoadingSpin: false,
-            });
-          }, 500);
-        });
+        .catch(error => this.setState({ error }));
+      // .finally(() => {
+      //   setTimeout(() => {
+      //     this.setState({
+      //       isEmpty: false,
+      //       isEnterText: false,
+      //       isLoadingSpin: false,
+      //     });
+      //   }, 500);
+      // });
     }
   }
 
