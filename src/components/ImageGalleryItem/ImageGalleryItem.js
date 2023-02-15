@@ -1,5 +1,6 @@
 import css from './imageGalleryItem.module.css';
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export default class ImageGalleryItem extends Component {
   render() {
@@ -19,3 +20,7 @@ export default class ImageGalleryItem extends Component {
     );
   }
 }
+ImageGalleryItem.propTypes = {
+  elem: PropTypes.object,
+  setLargeImgUrl: PropTypes.func,
+};

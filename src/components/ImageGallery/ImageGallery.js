@@ -1,5 +1,6 @@
-import css from './imageGallery.module.css';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
+import css from './imageGallery.module.css';
+import PropTypes from 'prop-types';
 
 import { Component } from 'react';
 
@@ -20,3 +21,7 @@ export default class ImageGallery extends Component {
     );
   }
 }
+ImageGallery.propTypes = {
+  collection: PropTypes.array.isRequired,
+  setLargeImgUrl: PropTypes.func,
+};

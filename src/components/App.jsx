@@ -4,23 +4,22 @@ import Button from './Button/Button';
 import ImageGallery from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import Modal from './Modal/Modal';
-
-const API_KEY = '32040937-f5067777972aaaf890ed94a62';
-const baseURL = 'https://pixabay.com/api/';
+//
+import { getImages } from './Fetch/Fetch';
 
 class App extends Component {
   state = {
     page: 1,
     searchQuery: '',
     collection: [],
-    collectionEmpty: false,
-    isEnterText: true,
-    isLoadingMore: false,
-    error: '',
+    isButton: false,
     isLoadingSpin: false,
     largeImageURL: '',
+    alt: '',
     //
-    totalHits: '',
+    isEmptyText: false,
+    isEmptyCollection: '',
+    isOpenModal: false,
   };
 
   handleForm = searchForm => {
@@ -28,127 +27,99 @@ class App extends Component {
       page: 1,
       searchQuery: searchForm,
       collection: [],
+      isEmptyText: false,
+      alt: searchForm,
     });
   };
-
+  //for Button
   loadMore = () => {
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
   };
-
+  // for search img
   setLargeImgUrl = largeImageURL => {
     this.setState({
       largeImageURL: largeImageURL,
+      isOpenModal: true,
+    });
+  };
+  // for modal
+  handlerCloseModal = () => {
+    this.setState({
+      isOpenModal: !true,
     });
   };
 
-  closeModal = event => {
-    if (event.key === 'Escape') {
-      this.setState({
-        largeImageURL: '',
-      });
-    }
-  };
-  handlerClickBackdrop = event => {
-    if (event.currentTarget === event.target) {
-      this.setState({
-        largeImageURL: '',
-      });
-    }
-  };
+  async componentDidUpdate(_, prevState) {
+    const { page, searchQuery, collection } = this.state;
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.closeModal);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.closeModal);
-  }
-
-  componentDidUpdate(_, prevState) {
-    const { page, searchQuery } = this.state;
-    const length = page * 12;
     if (prevState.page !== page || prevState.searchQuery !== searchQuery) {
-      this.setState({ isLoadingSpin: true });
+      try {
+        this.setState({ isLoadingSpin: true, isEmptyText: true });
+        const { hits, totalHits } = await getImages(searchQuery, page);
 
-      fetch(
-        `${baseURL}?key=${API_KEY}&q=${searchQuery}&page=${page}&per_page=12`
-      )
-        .then(response => response.json())
-        .then(collection => {
-          if (length >= collection.totalHits) {
-            this.setState({ isLoadingMore: false, collectionEmpty: true });
-            return;
-          }
-
-          if (collection.total === 0) {
-            this.setState({ isLoadingMore: false, collectionEmpty: true });
-            return;
-          }
-
-          this.setState(prevState => ({
-            collection: [...prevState.collection, ...collection.hits],
-            isLoadingMore: true,
-            isPagin: true,
-            collectionEmpty: false,
-            totalHits: collection.totalHits,
-
-            //
-            isLoadingSpin: false,
-          }));
-        })
-        .catch(error => this.setState({ error }));
-      // .finally(() => {
-      //   setTimeout(() => {
-      //     this.setState({
-      //       isEmpty: false,
-      //       isEnterText: false,
-      //       isLoadingSpin: false,
-      //     });
-      //   }, 500);
-      // });
+        this.setState({
+          isButton: page < Math.ceil(totalHits / 12),
+          collection: [...collection, ...hits],
+          isEmptyCollection: hits.length === 0,
+        });
+      } catch (error) {
+        console.log(error.messege);
+      } finally {
+        this.setState({ isLoadingSpin: false });
+      }
     }
   }
 
   render() {
     const {
       collection,
-      error,
-      isLoadingMore,
-      isEnterText,
-      collectionEmpty,
-      searchQuery,
+      isButton,
       isLoadingSpin,
+      searchQuery,
       largeImageURL,
+      isEmptyText,
+      isEmptyCollection,
+      isOpenModal,
+      alt,
     } = this.state;
 
     return (
       <div>
-        {error && <div>Sorry, this pictures not found!... </div>}
         <Searchbar onForm={this.handleForm} />
-        {isEnterText && (
-          <div style={{ textAlign: 'center', marginTop: 10 }}>
+        {!isEmptyText && (
+          <div style={{ textAlign: 'center', marginTop: 10, fontSize: 22 }}>
             Please, enter any text...!
           </div>
         )}
+
         {isLoadingSpin && <Loader />}
-        {collectionEmpty && (
-          <div style={{ textAlign: 'center', marginTop: 10, color: 'red' }}>
+        {isEmptyCollection && (
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: 10,
+              color: 'red',
+              fontSize: 22,
+            }}
+          >
             Sorry, this pictures,name'{searchQuery}' not found!...
           </div>
         )}
+
         <ImageGallery
           collection={collection}
           setLargeImgUrl={this.setLargeImgUrl}
         />
-        {largeImageURL && (
+        {isOpenModal && (
           <Modal
             largeImageURL={largeImageURL}
-            handlerClickBackdrop={this.handlerClickBackdrop}
+            handlerCloseModal={this.handlerCloseModal}
+            alt={alt}
           />
         )}
-        {isLoadingMore && <Button loadMore={this.loadMore} />}
+        {isButton && <Button loadMore={this.loadMore} />}
       </div>
     );
   }
